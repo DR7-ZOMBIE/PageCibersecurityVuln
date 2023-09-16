@@ -1,0 +1,14 @@
+*{
+    padding: 0;
+    margin: 0;
+}
+
+.btn-primary.btn-block {
+    background-color: green;
+    border-color: green;
+}
+
+.btn-primary.btn-block:hover {
+    background-color: black;
+    border-color: black;
+}

@@ -1,0 +1,46 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+
+
+#section {
+    display: flex;
+    justify-content: space-around;
+    background: rgb(0, 0, 0);
+    background: linear-gradient(90deg, rgba(0, 0, 0, 1) 0%, rgba(17, 111, 0, 1) 1%, rgba(0, 0, 0, 1) 65%);
+    height: 40rem;
+}
+
+.imagenes {
+    height: 13rem;
+}
+
+.card {
+    text-align: center;
+    width: 20rem;
+    border-radius: 10px;
+}
+
+.card-text {
+    text-align: justify;
+    text-justify: inter-word;
+}
+
+.btn-primary {
+    background-color: green;
+    border-color: green;
+
+}
+
+.btn-primary:hover {
+    background-color: black;
+    border-color: black;
+
+}
+
+.card-title:hover {
+    background-color: green;
+    border-color: green;
+    transition: background-color 10s, border-color 10s;
+}
