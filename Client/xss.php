@@ -46,25 +46,27 @@
                             Deja tu comentario
                         </div>
                         <div class="card-body">
-                            <form id="commentForm">
-                                <div class="form-group">
-                                    <label for="username">Nombre de usuario:</label>
-                                    <input type="text" class="form-control" id="username" name="username"
-                                        placeholder="Tu nombre de usuario">
-                                </div>
-                                <div class="form-group">
-                                    <label for="comment">Comentario:</label>
-                                    <textarea class="form-control" id="comment" name="comment" rows="4"
-                                        placeholder="Tu comentario aquí"></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Enviar</button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div id="commentsSection" class="mt-5">
-                <!-- Comentarios Almacenados -->
+                             <form method="post" id="commentForm">
+                                 <div class="form-group">
+                                     <label for="usuarioname">Nombre de usuario:</label>
+                                     <input type="text" class="form-control" id="usuarioname" name="usuario"
+                                         placeholder="Tu nombre de usuario">
+                                 </div>
+                                 <div class="form-group">
+                                     <label for="comment">Comentario:</label>
+                                     <textarea class="form-control" id="comment" name="comment" rows="4"
+                                         placeholder="Tu comentario aquí"></textarea>
+                                 </div>
+                                 <button type="submit" class="btn btn-primary">Enviar</button>
+                             </form> 
+
+                          
+                         </div>
+                     </div>
+                 </div>
+             </div>
+             <div id="commentsSection" class="mt-5">
+                 <!-- Comentarios Almacenados -->
             </div>
         </div>
 
@@ -109,11 +111,102 @@
 
 <!--Aca pueden trabajar todo el codigo PHP seria mas facil-->
 
-<?php 
+<?php
+
+ $host = "localhost";   // Cambia esto al host de tu base de datos
+    $port = "5432";        // Cambia esto al puerto de tu base de datos
+    $dbname = "oscar";     // Cambia esto al nombre de tu base de datos
+    $dbuser = "postgres";  // Cambia esto a tu nombre de usuario de PostgreSQL
+    $dbpassword = "1234";  // Cambia esto a tu contraseña de PostgreSQL
+
+try {
+    // Establecer la conexión a la base de datos
+    $conn = new PDO("pgsql:host=$host;port=$port;dbname=$dbname", $dbuser, $dbpassword);
+
+    // Configurar el modo de errores para PDO a excepciones
+    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+    // Preparar y ejecutar una consulta SELECT para obtener todos los datos de la tabla
+    $sql = "SELECT * FROM xss";
+    $stmt = $conn->prepare($sql);
+    $stmt->execute();
+
+    // Obtener todos los resultados en forma de arreglo asociativo
+    $resultados = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // Mostrar los resultados
+    foreach ($resultados as $fila) {
+        echo "ID: " . $fila['id'] . "<br>";
+        echo "Comentario: " . $fila['comment'] . "<br>";
+        echo "Usuario: " . $fila['usuario'] . "<br>";
+        echo "<hr>";
+    }
+
+    // Cerrar la conexión a la base de datos
+    $conn = null;
+} catch (PDOException $e) {
+    echo "Error de conexión: " . $e->getMessage();
+}
+
+echo $_POST['comment'];
+$comment = $_POST['comment'];
+$usuario = $_POST['usuario'];
+
+if ( isset($_POST['comment']) && isset($_POST['usuario']) ) {
+    insertData($comment, $usuario);
+}else {
+    echo "No se pudo insertar los datos.";
+}
 
 
 
+function insertData($comment, $usuario): void
+{
+    $host = "localhost";   // Cambia esto al host de tu base de datos
+    $port = "5432";        // Cambia esto al puerto de tu base de datos
+    $dbname = "oscar";     // Cambia esto al nombre de tu base de datos
+    $dbuser = "postgres";  // Cambia esto a tu nombre de usuario de PostgreSQL
+    $dbpassword = "1234";  // Cambia esto a tu contraseña de PostgreSQL
 
+    try {
+        // Establecer la conexión a la base de datos
+        $conn = new PDO("pgsql:host=$host;port=$port;dbname=$dbname", $dbuser, $dbpassword);
 
+        // Configurar el modo de errores para PDO a excepciones
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
+        // Preparar la consulta INSERT
+        $sql = "INSERT INTO xss (comment, usuario) VALUES (:comment, :usuario)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bindParam(':comment', $comment, PDO::PARAM_STR);
+        $stmt->bindParam(':usuario', $usuario, PDO::PARAM_STR);
+
+        // Ejecutar la consulta
+        $stmt->execute();
+
+        echo "Datos insertados correctamente.";
+
+        // Cerrar la conexión a la base de datos
+        $conn = null;
+    } catch (PDOException $e) {
+        echo "Error de conexión: " . $e->getMessage();
+    }
+}
 ?>
+
+
+<!--
+    
+
+create table if not exists xss
+(
+    usuario text,
+    comment text,
+    id      serial
+);
+
+alter table xss
+    owner to postgres;
+    
+
+-->
