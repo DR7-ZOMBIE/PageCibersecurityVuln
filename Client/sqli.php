@@ -44,7 +44,7 @@
                     <div class="card login-form-1">
                         <div class="card-body">
                             <h3>Iniciar sesión</h3>
-                            <form>
+                            <form action="" method="post">
                                 <div class="form-group">
                                     <input type="text" class="form-control" placeholder="Tu Usuario *" value="" />
                                 </div>
@@ -112,13 +112,18 @@ if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());
 }
 echo "Connected successfully";
-?>
-
-<?php 
 
 
+if (isset($_POST['submit'])) {
+    // Your PHP code here
+    // You can access form data using $_POST
+    $username = $_POST['username'];
+    $password = $_POST['password'];
+   
+    // Perform some actions with the form data
+    // For example, you can validate the data, perform database operations, etc.
 
-
-
-
+    // Redirect or display a success message
+    echo $username;
+}
 ?>
