@@ -119,7 +119,7 @@ if (isset($_POST['submit'])) {
     // You can access form data using $_POST
     $username = $_POST['username'];
     $password = $_POST['password'];
-   
+
     // Perform some actions with the form data
     // For example, you can validate the data, perform database operations, etc.
 
