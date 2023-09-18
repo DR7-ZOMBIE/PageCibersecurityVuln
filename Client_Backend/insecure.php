@@ -106,11 +106,34 @@
 
 <!--Aca pueden trabajar todo el codigo PHP seria mas facil-->
 
-<?php 
+<?php
+$nombre = $_GET['firstName'];
+$apellido = $_GET['lastName'];
+$edad = $_GET['age'];
 
+class ConvisoPerson
+{
+    public $firstName;
+    public $lastName;
+    public $age;
+    public $accountAdmin = false;
 
+    public function validateAdmin()
+    {
+        if ($this->accountAdmin) {
+            echo '[+] ' . $this->firstName . ' is administrator' . PHP_EOL;
+        } else {
+            echo '[+] ' . $this->firstName . ' not is administrator' . PHP_EOL;
+        }
+    }
+}
 
+$convisoPerson = new ConvisoPerson();
+$convisoPerson->firstName = $nombre;
+$convisoPerson->lastName = $apellido;
+$convisoPerson->age = $edad;
+$convisoPerson->validateAdmin();
 
-
+echo serialize($convisoPerson);
 
 ?>
