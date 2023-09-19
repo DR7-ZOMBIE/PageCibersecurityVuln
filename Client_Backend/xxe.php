@@ -138,7 +138,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <comment>
             <username>{$username}</username>
             <text>{$comment}</text>
-            <productId>&xxe;</productId>
+            <!-- <productId>&xxe;</productId> -->
         </comment>
     XML;
 

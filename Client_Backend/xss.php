@@ -159,7 +159,6 @@ if (isset($_POST['comment']) && isset($_POST['usuario'])) {
 }
 
 
-
 function insertData($comment, $usuario): void
 {
     $host = "localhost"; // Cambia esto al host de tu base de datos
