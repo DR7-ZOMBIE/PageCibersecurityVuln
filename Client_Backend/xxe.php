@@ -38,37 +38,37 @@
     </nav>
 
     <section id="section" class="mt-5">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6 mx-auto">
-                    <div class="card">
-                        <div style="background-color: green;" class="card-header text-white">
-                            Deja tu comentario
-                        </div>
-                        <div class="card-body">
-                            <form id="commentForm">
-                                <div class="form-group">
-                                    <label for="username">Nombre de usuario:</label>
-                                    <input type="text" class="form-control" id="username" name="username"
-                                        placeholder="Tu nombre de usuario">
-                                </div>
-                                <div class="form-group">
-                                    <label for="comment">Comentario:</label>
-                                    <textarea class="form-control" id="comment" name="comment" rows="4"
-                                        placeholder="Tu comentario aquí"></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-primary">Enviar</button>
-                            </form>
-                        </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 mx-auto">
+                <div class="card">
+                    <div style="background-color: green;" class="card-header text-white">
+                        Deja tu comentario
+                    </div>
+                    <div class="card-body">
+                        <!-- Añadido solo el atributo method -->
+                        <form id="commentForm" method="post">
+                            <div class="form-group">
+                                <label for="username">Nombre de usuario:</label>
+                                <input type="text" class="form-control" id="username" name="username" placeholder="Tu nombre de usuario">
+                            </div>
+                            <div class="form-group">
+                                <label for="comment">Comentario:</label>
+                                <textarea class="form-control" id="comment" name="comment" rows="4" placeholder="Tu comentario aquí"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Enviar</button>
+                        </form>
                     </div>
                 </div>
             </div>
-            <div id="commentsSection" class="mt-5">
-                <!-- Comentarios Almacenados -->
-            </div>
         </div>
+        <div id="commentsSection" class="mt-5">
+            <!-- Comentarios Almacenados -->
+        </div>
+    </div>
+</section>
 
-    </section>
+
 
     <br><br><br><br><br><br>
 
@@ -111,35 +111,28 @@
 
 <?php
 
-$host = "localhost";
-$port = "5432";
-$dbname = "oscar";
-$dbuser = "postgres";
-$dbpassword = "1234";
-
-try {
-    $conn = new PDO("pgsql:host=$host;port=$port;dbname=$dbname", $dbuser, $dbpassword);
-
-    $sql = 'INSERT INTO comments (username, comment) VALUES (?, ?)';
-    $stmt = $conn->prepare($sql);
-
-    $stmt->bindParam(1, $_POST['username']);
-    $stmt->bindParam(2, $_POST['comment']);
-    $stmt->execute();
-
-    $sql = 'SELECT * FROM comments';
-    $stmt = $conn->prepare($sql);
-    $stmt->execute();
-    $comments = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    die("Database connection failed: " . $e->getMessage());
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = $_POST['username'];
-    $comment = $_POST['comment'];
+    try {
+        $host = "localhost";
+        $port = "5432";
+        $dbname = "oscar";
+        $dbuser = "dennis";
+        $dbpassword = "MCRUIZ@.";
 
-    $xmlString = <<<XML
+        $conn = new PDO("pgsql:host=$host;port=$port;dbname=$dbname", $dbuser, $dbpassword);
+
+        $username = $_POST['username'] ?? 'unknown';
+        $comment = $_POST['comment'] ?? 'No comment';
+
+        if ($username && $comment) {
+            $sql = 'INSERT INTO comments (username, comment) VALUES (?, ?)';
+            $stmt = $conn->prepare($sql);
+            $stmt->bindParam(1, $username);
+            $stmt->bindParam(2, $comment);
+            $stmt->execute();
+        }
+
+        $xmlString = <<<XML
         <?xml version="1.0" encoding="UTF-8"?>
         <!DOCTYPE foo [ <!ENTITY xxe SYSTEM "file:///etc/passwd"> ]>
         <comment>
@@ -155,11 +148,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (strpos($response, "root") !== false) {
         // La aplicacion es vulnerable
     }
+    } catch (PDOException $e) {
+        die("Database connection failed: " . $e->getMessage());
+    }
 }
 
 ?>
 
 <!--Explicacion de como funciona-->
+
+<!--
 
 /**
 ** 1) El usuario llena el formulario con su nombre de usuario y comentario.
@@ -173,3 +171,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 *? exitosamente.
 
 */
+
+
+-->
