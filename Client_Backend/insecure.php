@@ -36,30 +36,25 @@
         </div>
 
     </nav>
-
-    <section style="margin-bottom: 11rem;" class="mt-5">
-        <div class="container">
+    
+    <section>
+        <div style="margin-top: 13rem; margin-bottom:12rem" class="container login-container">
             <div class="row">
                 <div class="col-md-6 mx-auto">
-                    <div class="card">
-                        <div style="background-color: green;" class="card-header text-white">
-                            Ingrese sus datos
-                        </div>
+                    <div class="card login-form-1">
                         <div class="card-body">
-                            <form id="userDataForm">
+                            <h3>Iniciar sesión</h3>
+                            <form action="" method="post">
                                 <div class="form-group">
-                                    <label for="firstName">Nombre:</label>
-                                    <input type="text" class="form-control" id="firstName" name="firstName" placeholder="Tu nombre">
+                                    <input type="text" class="form-control" placeholder="Tu Usuario *" value="" />
                                 </div>
-                                <div class="form-group mt-3">
-                                    <label for="lastName">Apellido:</label>
-                                    <input type="text" class="form-control" id="lastName" name="lastName" placeholder="Tu apellido">
+                                <div class="form-group">
+                                    <input type="password" class="form-control" placeholder="Tu Contraseña *"
+                                        value="" />
                                 </div>
-                                <div class="form-group mt-3">
-                                    <label for="age">Edad:</label>
-                                    <input type="number" class="form-control" id="age" name="age" placeholder="Tu edad">
+                                <div class="form-group">
+                                    <input type="submit" class="btn btn-primary btn-block" value="Iniciar sesión" />
                                 </div>
-                                <button type="submit" class="btn btn-primary mt-3">Enviar</button>
                             </form>
                         </div>
                     </div>

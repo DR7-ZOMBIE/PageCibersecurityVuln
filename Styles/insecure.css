@@ -3,15 +3,9 @@
     margin: 0;
 }
 
-#section{
-    display: flex;
-    justify-content: center;
-}
-
 .btn-primary{
     background-color: green;
     border-color: green;
-    margin-left: 13rem;
 }
 
 .btn-primary:hover{
