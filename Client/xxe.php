@@ -38,35 +38,37 @@
     </nav>
 
     <section id="section" class="mt-5">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6 mx-auto">
-                <div class="card">
-                    <div style="background-color: green;" class="card-header text-white">
-                        Deja tu comentario
-                    </div>
-                    <div class="card-body">
-                        <!-- Añadido solo el atributo method -->
-                        <form id="commentForm" method="post">
-                            <div class="form-group">
-                                <label for="username">Nombre de usuario:</label>
-                                <input type="text" class="form-control" id="username" name="username" placeholder="Tu nombre de usuario">
-                            </div>
-                            <div class="form-group">
-                                <label for="comment">Comentario:</label>
-                                <textarea class="form-control" id="comment" name="comment" rows="4" placeholder="Tu comentario aquí"></textarea>
-                            </div>
-                            <button type="submit" class="btn btn-primary">Enviar</button>
-                        </form>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 mx-auto">
+                    <div class="card">
+                        <div style="background-color: green;" class="card-header text-white">
+                            Deja tu comentario
+                        </div>
+                        <div class="card-body">
+                            <!-- Añadido solo el atributo method -->
+                            <form id="commentForm" method="post">
+                                <div class="form-group">
+                                    <label for="username">Nombre de usuario:</label>
+                                    <input type="text" class="form-control" id="username" name="username"
+                                        placeholder="Tu nombre de usuario">
+                                </div>
+                                <div class="form-group">
+                                    <label for="comment">Comentario:</label>
+                                    <textarea class="form-control" id="comment" name="comment" rows="4"
+                                        placeholder="Tu comentario aquí"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary">Enviar</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
+            <div id="commentsSection" class="mt-5">
+                <!-- Comentarios Almacenados -->
+            </div>
         </div>
-        <div id="commentsSection" class="mt-5">
-            <!-- Comentarios Almacenados -->
-        </div>
-    </div>
-</section>
+    </section>
 
 
 
@@ -107,12 +109,16 @@
 
 </html>
 
+
 <!--Aca pueden trabajar todo el codigo PHP seria mas facil-->
 
 <?php
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
+
+        libxml_disable_entity_loader(false);
+
+
         $host = "localhost";
         $port = "5432";
         $dbname = "oscar";
@@ -121,8 +127,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $conn = new PDO("pgsql:host=$host;port=$port;dbname=$dbname", $dbuser, $dbpassword);
 
-        $username = $_POST['username'] ?? 'unknown';
-        $comment = $_POST['comment'] ?? 'No comment';
+        $username = htmlspecialchars($_POST['username'] ?? 'unknown'); // sanitización básica
+        $comment = htmlspecialchars($_POST['comment'] ?? 'No comment'); // sanitización básica
+
+
+        // Verifica si la solicitud proviene de Burp Suite (puedes ajustar el User-Agent según tu configuración de Burp)
+        $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+        $isBurpSuite = strpos($userAgent, 'Burp Suite') !== false;
 
         if ($username && $comment) {
             $sql = 'INSERT INTO comments (username, comment) VALUES (?, ?)';
@@ -138,21 +149,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <comment>
             <username>{$username}</username>
             <text>{$comment}</text>
-            <!-- <productId>&xxe;</productId> -->
         </comment>
     XML;
 
-    $xml = simplexml_load_string($xmlString);
-    $response = $app->processRequest($xml);
+        $dom = new DOMDocument;
+        $dom->loadXML($xmlString, LIBXML_NOENT | LIBXML_DTDLOAD); // peligroso, solo para demostración
+        $simpleXML = simplexml_import_dom($dom);
 
-    if (strpos($response, "root") !== false) {
-        // La aplicacion es vulnerable
-    }
+        $response = $simpleXML->asXML();  // convertir a string
+
+        if ($response) {
+            echo htmlspecialchars($response);  // imprime el XML
+        }
+        
+
+        if (strpos($response, "root") !== false) {
+            // La aplicación es vulnerable
+        }
+
     } catch (PDOException $e) {
         die("Database connection failed: " . $e->getMessage());
     }
 }
-
 ?>
 
 <!--Explicacion de como funciona-->
