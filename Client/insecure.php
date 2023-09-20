@@ -95,76 +95,69 @@
         </div>
     </footer>
 
-</body>
+    <?php
+    ob_start();
+    $loginSuccessful = false;
 
-</html>
+    if (isset($_COOKIE['user_data'])) {
+        // Cookie exists, attempt to deserialize and verify
+        $cookieValue = base64_decode($_COOKIE['user_data']);
+        $userData = unserialize($cookieValue);
+        if ($userData !== false && isset($userData['username']) && isset($userData['password'])) {
+            // You can check if the user is an admin here
+            if ($userData['admin']) {
+                echo '<p>Login successful! User is an admin.</p>';
+            } else {
+                echo '<p>Login successful! User is not an admin.</p>';
+            }
+            $loginSuccessful = true;
+        } else {
+            echo '<p>Invalid cookie data.</p>';
+        }
+    }
 
-<!--Aca pueden trabajar todo el codigo PHP seria mas facil-->
-
-<?php
-ob_start();
-$loginSuccessful = false;
-
-if (isset($_COOKIE['user_data'])) {
-    // Cookie exists, attempt to deserialize and verify
-    $userData = unserialize($_COOKIE['user_data']);
-    if ($userData !== false && isset($userData['username']) && isset($userData['password'])) {
+    if (!$loginSuccessful && $_SERVER['REQUEST_METHOD'] === 'POST') {
         $loginUsername = $_POST['username'];
         $loginPassword = $_POST['password']; // Plain text password entered by the user
 
-        // Check if the provided username and password match the stored data
-        if ($loginUsername === $userData['username'] && password_verify($loginPassword, $userData['password'])) {
-            // Successful login
+        // Read user data from the text file (users.txt)
+        $lines = file('users.txt', FILE_IGNORE_NEW_LINES);
 
-            // Check if the user is an admin
-            if ($userData['admin']) {
-                echo 'Login successful! User is an admin.';
-            } else {
-                echo 'Login successful! User is not an admin.';
-            }
+        foreach ($lines as $line) {
+            $userData = unserialize($line);
 
-            $loginSuccessful = true;
-        }
-    } else {
-        echo 'Invalid cookie data.';
-    }
-}
+            if ($userData !== false && isset($userData['username']) && isset($userData['password'])) {
+                // Check if the provided username and password match the stored data
+                if ($loginUsername === $userData['username'] && password_verify($loginPassword, $userData['password'])) {
+                    // Successful login
 
-if (!$loginSuccessful && $_SERVER['REQUEST_METHOD'] === 'POST') {
-    $loginUsername = $_POST['username'];
-    $loginPassword = $_POST['password']; // Plain text password entered by the user
+                    // You can set the admin status here based on your criteria
+                    $userData['admin'] = ($userData['username'] === 'admin');
 
-    // Read user data from the text file (users.txt)
-    $lines = file('users.txt', FILE_IGNORE_NEW_LINES);
+                    // Create a cookie for future logins with base64-encoded user data
+                    $cookieValue = base64_encode(serialize($userData));
+                    setcookie('user_data', $cookieValue, time() + 3600, '/'); // Cookie expires in 1 hour
 
-    foreach ($lines as $line) {
-        $userData = unserialize($line);
+                    // Check if the user is an admin
+                    if ($userData['admin']) {
+                        echo '<p>Login successful! User is an admin.</p>';
+                    } else {
+                        echo '<p>Login successful! User is not an admin.</p>';
+                    }
 
-        if ($userData !== false && isset($userData['username']) && isset($userData['password'])) {
-            // Check if the provided username and password match the stored data
-            if ($loginUsername === $userData['username'] && password_verify($loginPassword, $userData['password'])) {
-                // Successful login
-
-                // Check if the user is an admin
-                if ($userData['admin']) {
-                    echo 'Login successful! User is an admin.';
-                } else {
-                    echo 'Login successful! User is not an admin.';
+                    $loginSuccessful = true;
+                    break; // Exit the loop
                 }
-
-                // Create a cookie for future logins
-                setcookie('user_data', serialize($userData), time() + 3600, '/'); // Cookie expires in 1 hour
-                $loginSuccessful = true;
-                break; // Exit the loop
             }
         }
-    }
 
-    // If the loop finishes without a successful login, show an error message
-    if (!$loginSuccessful) {
-        echo 'Login failed. Invalid username or password.';
+        // If the loop finishes without a successful login, show an error message
+        if (!$loginSuccessful) {
+            echo '<p>Login failed. Invalid username or password.</p>';
+        }
     }
-}
-ob_end_flush();
-?>
+    ob_end_flush();
+    ?>
+</body>
 
+</html>
