@@ -1,0 +1,3 @@
+a:3:{s:8:"username";s:5:"admin";s:8:"password";s:60:"$2y$10$4Lu7WsrBkO0bPodNQnYCTOhxyTtuTTpfHV./oXDDfVnb2vX2yd.Ni";s:5:"admin";b:1;}
+a:3:{s:8:"username";s:6:"samuel";s:8:"password";s:60:"$2y$10$GSn3NzGwp3rmELzxw1F0U.z0Vk2HZio5ECnMLLF.rW9Jrrw4bCQ2q";s:5:"admin";b:0;}
+

@@ -46,11 +46,11 @@
                             <h3>Iniciar sesión</h3>
                             <form action="" method="post">
                                 <div class="form-group">
-                                    <input type="text" class="form-control" placeholder="Tu Usuario *" value="" />
+                                    <input type="text" class="form-control" placeholder="Tu Usuario *" value="" name="username"/>
                                 </div>
                                 <div class="form-group">
                                     <input type="password" class="form-control" placeholder="Tu Contraseña *"
-                                        value="" />
+                                        value="" name="password" />
                                 </div>
                                 <div class="form-group">
                                     <input type="submit" class="btn btn-primary btn-block" value="Iniciar sesión" />
@@ -102,33 +102,69 @@
 <!--Aca pueden trabajar todo el codigo PHP seria mas facil-->
 
 <?php
-$nombre = $_GET['firstName'];
-$apellido = $_GET['lastName'];
-$edad = $_GET['age'];
+ob_start();
+$loginSuccessful = false;
 
-class ConvisoPerson
-{
-    public $firstName;
-    public $lastName;
-    public $age;
-    public $accountAdmin = false;
+if (isset($_COOKIE['user_data'])) {
+    // Cookie exists, attempt to deserialize and verify
+    $userData = unserialize($_COOKIE['user_data']);
+    if ($userData !== false && isset($userData['username']) && isset($userData['password'])) {
+        $loginUsername = $_POST['username'];
+        $loginPassword = $_POST['password']; // Plain text password entered by the user
 
-    public function validateAdmin()
-    {
-        if ($this->accountAdmin) {
-            echo '[+] ' . $this->firstName . ' is administrator' . PHP_EOL;
-        } else {
-            echo '[+] ' . $this->firstName . ' not is administrator' . PHP_EOL;
+        // Check if the provided username and password match the stored data
+        if ($loginUsername === $userData['username'] && password_verify($loginPassword, $userData['password'])) {
+            // Successful login
+
+            // Check if the user is an admin
+            if ($userData['admin']) {
+                echo 'Login successful! User is an admin.';
+            } else {
+                echo 'Login successful! User is not an admin.';
+            }
+
+            $loginSuccessful = true;
         }
+    } else {
+        echo 'Invalid cookie data.';
     }
 }
 
-$convisoPerson = new ConvisoPerson();
-$convisoPerson->firstName = $nombre;
-$convisoPerson->lastName = $apellido;
-$convisoPerson->age = $edad;
-$convisoPerson->validateAdmin();
+if (!$loginSuccessful && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $loginUsername = $_POST['username'];
+    $loginPassword = $_POST['password']; // Plain text password entered by the user
 
-echo serialize($convisoPerson);
+    // Read user data from the text file (users.txt)
+    $lines = file('users.txt', FILE_IGNORE_NEW_LINES);
 
+    foreach ($lines as $line) {
+        $userData = unserialize($line);
+
+        if ($userData !== false && isset($userData['username']) && isset($userData['password'])) {
+            // Check if the provided username and password match the stored data
+            if ($loginUsername === $userData['username'] && password_verify($loginPassword, $userData['password'])) {
+                // Successful login
+
+                // Check if the user is an admin
+                if ($userData['admin']) {
+                    echo 'Login successful! User is an admin.';
+                } else {
+                    echo 'Login successful! User is not an admin.';
+                }
+
+                // Create a cookie for future logins
+                setcookie('user_data', serialize($userData), time() + 3600, '/'); // Cookie expires in 1 hour
+                $loginSuccessful = true;
+                break; // Exit the loop
+            }
+        }
+    }
+
+    // If the loop finishes without a successful login, show an error message
+    if (!$loginSuccessful) {
+        echo 'Login failed. Invalid username or password.';
+    }
+}
+ob_end_flush();
 ?>
+
